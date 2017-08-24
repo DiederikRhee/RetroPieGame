@@ -288,13 +288,26 @@ def gameloop():
             if ((frameNumber%(setFPS*6))== 0):
                 newAmmo = Ammo()
                 ammos.append(newAmmo)
-        else:     
-            if ((frameNumber%(setFPS/(2 * player.GetLevel() + 4)))== 0):
+        elif (player.GetLevel() == 3):                
+            if ((frameNumber%(setFPS/8))== 0):
                 newEnemy = Enemy()
                 enemies.append(newEnemy)
-            if ((frameNumber%(setFPS*(2 * player.GetLevel() + 4)))== 0):
+                newEnemy1 = Enemy()
+                enemies.append(newEnemy1)
+            if ((frameNumber%(setFPS*8))== 0):
                 newAmmo = Ammo()
                 ammos.append(newAmmo)
+        else:             
+            if ((frameNumber%(setFPS/10))== 0):
+                newEnemy = Enemy()
+                enemies.append(newEnemy)
+                newEnemy1 = Enemy()
+                enemies.append(newEnemy1)
+                newEnemy2 = Enemy()
+                enemies.append(newEnemy2)
+            if ((frameNumber%(setFPS*10))== 0):
+                newAmmo = Ammo()
+                ammos.append(newAmmo)  
         player.handle_keys() 
         bg.draw(gameDisplay)
         player.draw(gameDisplay)
