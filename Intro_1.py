@@ -48,13 +48,13 @@ class SpaceShip(object):
             if ((self.y + self.speed + self.PlayerImg.get_height()) < (display_height - 10)):
                 self.y += self.speed # move down
     def draw(self, surface): 
-        myfont = pygame.font.SysFont(None, 30)
+        myfont = pygame.font.SysFont(None, 50)
         HighScoreLabel = myfont.render("Highscore: " + str(self.highscore), 1, (255,255,255))
         ScoreLabel = myfont.render("Score: " + str(self.score), 1, (255,255,255))
         BulletsLabel = myfont.render("Bullets: " + str(self.bullets), 1, (255,255,255))
         surface.blit(HighScoreLabel, (10, 10))
-        surface.blit(ScoreLabel, (210, 10))
-        surface.blit(BulletsLabel, (410, 10))
+        surface.blit(ScoreLabel, (310, 10))
+        surface.blit(BulletsLabel, (510, 10))
         surface.blit(self.PlayerImg, (self.x, self.y))
     def GetPosition(self):
         return (self.x, self.y)
@@ -124,6 +124,8 @@ class Background(object):
                 self.Stars.remove(star)
             else:
                 star.draw(surface)
+    def StopMusic(self):
+        self.music.stop()
 class Ammo(object):
     def __init__(self):
         self.AmmoImg = pygame.image.load(gameFileLocation + '/sprites/Ammo.png')
@@ -177,9 +179,9 @@ class FPSMeasure:
             seconds = newTime-self.lastTime
             self.lastTime = newTime
             self.currentFPS = (self.freqency/seconds)
-        myfont = pygame.font.SysFont(None, 30)
+        myfont = pygame.font.SysFont(None, 50)
         FPSLabel = myfont.render("FPS: " + "{0:.2f}".format(self.currentFPS), 1, (255,255,255))
-        surface.blit(FPSLabel, (610, 10))    
+        surface.blit(FPSLabel, (710, 10))    
 
 def message_display(screen, player):
     myfont = pygame.font.SysFont(None, 100)
@@ -263,6 +265,7 @@ def gameloop():
         for enemy in enemies:
             if enemy.get_Rect().colliderect(player.get_Rect()):
                 crashed = True
+                bg.StopMusic()
                 message_display(gameDisplay, player);
             if (enemy.calculateNewPos() > display_height):
                 enemies.remove(enemy)
