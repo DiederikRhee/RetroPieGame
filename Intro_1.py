@@ -31,6 +31,8 @@ class SpaceShip(object):
         self.score = 0
         self.bullets = 10
         self.highscore = read_from_file_and_find_highscore(gameFileLocation + "/results.txt")[1]
+        self.level = 1
+        self.starttime = time.time()
     def handle_keys(self):
         """ Handles Keys """
         key = pygame.key.get_pressed()
@@ -47,21 +49,31 @@ class SpaceShip(object):
         elif key[pygame.K_DOWN]: # down key
             if ((self.y + self.speed + self.PlayerImg.get_height()) < (display_height - 10)):
                 self.y += self.speed # move down
-    def draw(self, surface): 
+    def draw(self, surface):
+        if (time.time() > (self.starttime + 1)):
+            self.starttime = time.time()
+            self.score += 1
         myfont = pygame.font.SysFont(None, 50)
         HighScoreLabel = myfont.render("Highscore: " + str(self.highscore), 1, (255,255,255))
         ScoreLabel = myfont.render("Score: " + str(self.score), 1, (255,255,255))
-        BulletsLabel = myfont.render("Bullets: " + str(self.bullets), 1, (255,255,255))
-        surface.blit(HighScoreLabel, (10, 10))
-        surface.blit(ScoreLabel, (310, 10))
-        surface.blit(BulletsLabel, (510, 10))
+        if (self.bullets == 0):
+            BulletsLabel = myfont.render("Bullets: " + str(self.bullets), 1, (255,0,0))
+        else:
+            BulletsLabel = myfont.render("Bullets: " + str(self.bullets), 1, (255,255,255))
+        LevelLabel = myfont.render("Level: " + str(self.level), 1, (255,255,255))
+        surface.blit(HighScoreLabel, (280, 10))
+        surface.blit(ScoreLabel, (550, 10))
+        surface.blit(BulletsLabel, (820, 10))
+        surface.blit(LevelLabel, (1090, 10))
         surface.blit(self.PlayerImg, (self.x, self.y))
     def GetPosition(self):
         return (self.x, self.y)
     def get_Rect(self):
         return pygame.Rect(self.x, self.y, self.PlayerImg.get_width(), self.PlayerImg.get_height())
     def IncreaseScore(self):
-        self.score += 1
+        self.score += 10
+        if ((self.score%100) == 0):
+            self.level += 1
         if (self.score > self.highscore):
             self.highscore = self.score
             readedHighScore = self.highscore
@@ -74,6 +86,8 @@ class SpaceShip(object):
         return True
     def AddBullets(self, number):
         self.bullets += number
+    def GetLevel(self):
+        return self.level
     
 class PlayerBullet(object):
     def __init__(self, x, y):
@@ -107,6 +121,7 @@ class Background(object):
     def __init__(self):
         self.music = pygame.mixer.Sound(gameFileLocation + '/music/Background_Loop.ogg')
         self.music.play(-1)
+        self.music.set_volume(0.5)
         self.Stars = []
         self.x = 0
         self.y = 0
@@ -129,6 +144,7 @@ class Background(object):
 class Ammo(object):
     def __init__(self):
         self.AmmoImg = pygame.image.load(gameFileLocation + '/sprites/Ammo.png')
+        self.effect = pygame.mixer.Sound(gameFileLocation + '/sounds/NewAmmo.wav')
         self.x = random.randint(0, display_width - self.AmmoImg.get_width())
         self.y = -20
         self.speed = (240/setFPS)
@@ -139,7 +155,8 @@ class Ammo(object):
         return self.y
     def get_Rect(self):
         return pygame.Rect(self.x, self.y, self.AmmoImg.get_width(), self.AmmoImg.get_height())
-
+    def PlayAmmoSound(self):
+        self.effect.play()
 class Enemy(object):
     def __init__(self):
         self.EnemyImg = pygame.image.load(gameFileLocation + '/sprites/Enemy.png')
@@ -181,7 +198,7 @@ class FPSMeasure:
             self.currentFPS = (self.freqency/seconds)
         myfont = pygame.font.SysFont(None, 50)
         FPSLabel = myfont.render("FPS: " + "{0:.2f}".format(self.currentFPS), 1, (255,255,255))
-        surface.blit(FPSLabel, (710, 10))    
+        surface.blit(FPSLabel, (10, 10))    
 
 def message_display(screen, player):
     myfont = pygame.font.SysFont(None, 100)
@@ -257,14 +274,27 @@ def gameloop():
                         playerPosition = player.GetPosition()
                         newBullet = PlayerBullet(playerPosition[0], playerPosition[1])
                         player_Bullets.append(newBullet)
-                        
-        if ((frameNumber%(setFPS/4))== 0):
-            newEnemy = Enemy()
-            enemies.append(newEnemy)
-        if ((frameNumber%(setFPS*3))== 0):
-            newAmmo = Ammo()
-            ammos.append(newAmmo)
-            
+        if (player.GetLevel() == 1):                
+            if ((frameNumber%(setFPS/4))== 0):
+                newEnemy = Enemy()
+                enemies.append(newEnemy)
+            if ((frameNumber%(setFPS*4))== 0):
+                newAmmo = Ammo()
+                ammos.append(newAmmo)
+        elif (player.GetLevel() == 2):                
+            if ((frameNumber%(setFPS/6))== 0):
+                newEnemy = Enemy()
+                enemies.append(newEnemy)
+            if ((frameNumber%(setFPS*6))== 0):
+                newAmmo = Ammo()
+                ammos.append(newAmmo)
+        else:     
+            if ((frameNumber%(setFPS/(2 * player.GetLevel() + 4)))== 0):
+                newEnemy = Enemy()
+                enemies.append(newEnemy)
+            if ((frameNumber%(setFPS*(2 * player.GetLevel() + 4)))== 0):
+                newAmmo = Ammo()
+                ammos.append(newAmmo)
         player.handle_keys() 
         bg.draw(gameDisplay)
         player.draw(gameDisplay)
@@ -297,6 +327,7 @@ def gameloop():
                 
         for ammo in ammos:
             if ammo.get_Rect().colliderect(player.get_Rect()):
+                ammo.PlayAmmoSound()
                 ammos.remove(ammo)
                 player.AddBullets(15)
             for enemy in enemies:
