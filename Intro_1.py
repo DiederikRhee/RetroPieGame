@@ -20,7 +20,7 @@ pygame.display.set_caption('Space Shooter')
 
 gameFileLocation = os.path.dirname(os.path.realpath(__file__))
 
-setFPS = 60
+setFPS = 30
 class SpaceShip(object):
     def __init__(self):
         self.PlayerImg = pygame.image.load(gameFileLocation+ '/sprites/Space_Ship.png')
