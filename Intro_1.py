@@ -105,6 +105,8 @@ class Star(object):
         return
 class Background(object):
     def __init__(self):
+        self.music = pygame.mixer.Sound(gameFileLocation + '/music/Background_Loop.ogg')
+        self.music.play(-1)
         self.Stars = []
         self.x = 0
         self.y = 0
