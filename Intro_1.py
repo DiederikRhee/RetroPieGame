@@ -220,8 +220,14 @@ def write_to_file(file_name, your_name, points):
     score_file.close()
     
 
-
+def ShowLoading(surface):
+    font = pygame.font.SysFont(None, 120, bold=True)
+    img = font.render('Loading..', True, white, black)
+    surface.blit(img, ((display_width - img.get_width())/2,(display_height - img.get_height())/2))
+    pygame.display.update()
+    
 def gameloop():
+    ShowLoading(gameDisplay)
     gamelevel = 1
     crashed = False
     bg = Background()      
@@ -230,11 +236,11 @@ def gameloop():
     enemies = []
     ammos = []
     fpsHandler = FPSMeasure()
-
+    ShowLoading(gameDisplay)
 
     for i in range (0,display_height):
         bg.draw(gameDisplay)
-        
+    ShowLoading(gameDisplay)   
     clock = pygame.time.Clock()
     frameNumber = 0  
     while not crashed:
