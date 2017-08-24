@@ -90,14 +90,38 @@ class PlayerBullet(object):
         surface.blit(self.BulletImg, (self.x, self.y))
     def get_Rect(self):
         return pygame.Rect(self.x, self.y, self.BulletImg.get_width(), self.BulletImg.get_height())
-        
+    
+class Star(object):
+    def __init__(self):
+        self.x = random.randint(0, display_width - 10)
+        self.y = -20
+        self.speed = (100/setFPS)
+        self.StarImg = pygame.image.load(gameFileLocation + '/sprites/Star_' + str(random.randint(1,5))+ '.png')
+    def calculateNewPos(self):
+        self.y += self.speed
+        return self.y    
+    def draw(self, surface):
+        surface.blit(self.StarImg, (self.x, self.y))
+        return
 class Background(object):
     def __init__(self):
+        self.Stars = []
         self.x = 0
         self.y = 0
+        self.counter = 0
+        self.newStar = random.randint(15,25)
     def draw(self, surface):
         surface.fill(black)
-
+        self.counter += 1
+        if (self.counter == self.newStar):
+            self.counter = 0
+            self.newStar = random.randint(2,13)
+            self.Stars.append(Star())
+        for star in self.Stars:
+            if (star.calculateNewPos() > display_height):
+                self.Stars.remove(star)
+            else:
+                star.draw(surface)
 class Ammo(object):
     def __init__(self):
         self.AmmoImg = pygame.image.load(gameFileLocation + '/sprites/Ammo.png')
@@ -202,7 +226,11 @@ def gameloop():
     enemies = []
     ammos = []
     fpsHandler = FPSMeasure()
-    
+
+
+    for i in range (0,display_height):
+        bg.draw(gameDisplay)
+        
     clock = pygame.time.Clock()
     frameNumber = 0  
     while not crashed:
